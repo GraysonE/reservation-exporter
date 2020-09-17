@@ -1,0 +1,17 @@
+{
+    "name": "grayson-erhard/reservation-exporter",
+    "description": "Exports reservation data for Buffalo Crossing.",
+    "type": "wordpress-plugin",
+    "authors": [
+        {
+            "name": "Grayson Erhard",
+            "email": "web@graysonerhard.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "GraysonErhard\\ReservationExporter\\": "./"
+        }
+    }
+}

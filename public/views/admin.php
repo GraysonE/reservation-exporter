@@ -17,5 +17,12 @@ function admin_page_load() {
 }
 
 function admin_page() {
-	echo 'sup';
+	?>
+	<div class="container">
+		<h2>Export Reservation Data</h2>
+		<div class="button_wrap">
+			<button id="export_reservations">Export</button>
+		</div>
+	</div>
+	<?php
 }

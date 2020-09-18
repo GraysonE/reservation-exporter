@@ -1,0 +1,23 @@
+{
+  "name": "reservation-exporter",
+  "version": "1.0.0",
+  "description": "Exports reservation data for Buffalo Crossing.",
+  "main": "index.js",
+  "dependencies": {
+    "generate-changelog": "^1.8.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GraysonE/reservation-exporter.git"
+  },
+  "author": "Grayson Erhard",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GraysonE/reservation-exporter/issues"
+  },
+  "homepage": "https://github.com/GraysonE/reservation-exporter#readme"
+}

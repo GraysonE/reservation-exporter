@@ -8,7 +8,9 @@
             "email": "web@graysonerhard.com"
         }
     ],
-    "require": {},
+    "require": {
+        "nesbot/carbon": "^2.40"
+    },
     "autoload": {
         "psr-4": {
             "GraysonErhard\\ReservationExporter\\": "./"

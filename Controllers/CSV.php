@@ -83,7 +83,7 @@ class CSV
         $fh = fopen($filename, "w");
 
         foreach ($this->csv as $line) {
-            fputcsv($fh, $line, ',', "'");
+            fputcsv($fh, $line, ',');
         }
 
         fclose($fh);

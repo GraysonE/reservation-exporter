@@ -50,15 +50,15 @@ class Export
 
         global $wpdb;
 
-        $booking_query = 'SELECT * FROM wp_wpsc_order_booking_info LIMIT 150';
+        $booking_query = 'SELECT * FROM wp_wpsc_order_booking_info';
 
         $bookings = $wpdb->get_results($booking_query);
 
         foreach ($bookings as $i => $b) {
 
             // Booking Details
-            $this->export[$i]                    = new \stdClass();
-            $this->export[$i]->booking_details   = $b;
+            $this->export[$i] = new \stdClass();
+//            $this->export[$i]->booking_details   = $b;
             $this->export[$i]->purchase_id       = $b->entity_id;
             $this->export[$i]->purchase_date     = $b->created_at;
             $this->export[$i]->confirmed         = ($b->status == '1') ? 'Yes' : 'No';
@@ -73,17 +73,17 @@ class Export
             $customer_query   = 'SELECT * FROM wp_wpsc_submited_form_data WHERE log_id = '.$b->order_id;
             $customer_details = $wpdb->get_results($customer_query);
 
-            $this->export[$i]->first_name = '';
-            $this->export[$i]->last_name = '';
-            $this->export[$i]->address = '';
-            $this->export[$i]->city = '';
-            $this->export[$i]->state = '';
-            $this->export[$i]->country = '';
-            $this->export[$i]->zip = '';
-            $this->export[$i]->email = '';
-            $this->export[$i]->phone = '';
+            $this->export[$i]->first_name   = '';
+            $this->export[$i]->last_name    = '';
+            $this->export[$i]->address      = '';
+            $this->export[$i]->city         = '';
+            $this->export[$i]->state        = '';
+            $this->export[$i]->country      = '';
+            $this->export[$i]->zip          = '';
+            $this->export[$i]->email        = '';
+            $this->export[$i]->phone        = '';
             $this->export[$i]->arrival_time = '';
-            $this->export[$i]->comments = '';
+            $this->export[$i]->comments     = '';
 
             foreach ($customer_details as $c) {
                 if ($c->form_id == 2) {
@@ -95,7 +95,10 @@ class Export
                 } elseif ($c->form_id == 5) {
                     $this->export[$i]->city = ucwords(strtolower(trim($c->value)));
                 } elseif ($c->form_id == 6) {
-                    $this->export[$i]->state = ucwords(strtolower(trim($c->value)));
+                    $state_number            = $c->value;
+                    $state_query             = "SELECT name from wp_wpsc_region_tax WHERE id = $state_number";
+                    $state                   = $wpdb->get_var($state_query);
+                    $this->export[$i]->state = ucwords(strtolower(trim($state)));
                 } elseif ($c->form_id == 7) {
                     $this->export[$i]->country = $c->value;
                 } elseif ($c->form_id == 8) {
@@ -110,6 +113,8 @@ class Export
                     $this->export[$i]->comments = $c->value;
                 }
             }
+
+            $this->export[$i]->customer_details = $customer_details;
 
             // Filter out bad values before continuing.
             // Had to be this late because Booking details didn't have an obvious flag.

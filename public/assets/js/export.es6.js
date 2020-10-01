@@ -17,8 +17,8 @@ async function reservation_export() {
 
 			// Examine the text in the response
 			response.json().then( function( r ) {
-				console.log( r );
-				window.open( r.data.url, '_blank' );
+				console.log( r.data.export );
+				// window.open( r.data.url, '_blank' );
 			} );
 		} )
 		.catch( function( err ) {

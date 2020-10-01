@@ -9,7 +9,8 @@
         }
     ],
     "require": {
-        "nesbot/carbon": "^2.40"
+        "nesbot/carbon": "^1.39.1",
+        "symfony/polyfill-php56": "^1.18"
     },
     "autoload": {
         "psr-4": {

@@ -8,13 +8,14 @@ class ComposerStaticInit26f2ccdf314ea23580e659cbaab8fe51
 {
     public static $files = array (
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
-        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
+        'bd9634f2d41831496de0d3dfe4c94881' => __DIR__ . '/..' . '/symfony/polyfill-php56/bootstrap.php',
     );
 
     public static $prefixLengthsPsr4 = array (
         'S' => 
         array (
-            'Symfony\\Polyfill\\Php80\\' => 23,
+            'Symfony\\Polyfill\\Util\\' => 22,
+            'Symfony\\Polyfill\\Php56\\' => 23,
             'Symfony\\Polyfill\\Mbstring\\' => 26,
             'Symfony\\Contracts\\Translation\\' => 30,
             'Symfony\\Component\\Translation\\' => 30,
@@ -23,16 +24,16 @@ class ComposerStaticInit26f2ccdf314ea23580e659cbaab8fe51
         array (
             'GraysonErhard\\ReservationExporter\\' => 34,
         ),
-        'C' => 
-        array (
-            'Carbon\\' => 7,
-        ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Symfony\\Polyfill\\Php80\\' => 
+        'Symfony\\Polyfill\\Util\\' => 
         array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
+            0 => __DIR__ . '/..' . '/symfony/polyfill-util',
+        ),
+        'Symfony\\Polyfill\\Php56\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php56',
         ),
         'Symfony\\Polyfill\\Mbstring\\' => 
         array (
@@ -50,16 +51,20 @@ class ComposerStaticInit26f2ccdf314ea23580e659cbaab8fe51
         array (
             0 => __DIR__ . '/../..' . '/',
         ),
-        'Carbon\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon',
-        ),
     );
 
-    public static $classMap = array (
-        'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
-        'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
-        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
+    public static $fallbackDirsPsr4 = array (
+        0 => __DIR__ . '/..' . '/nesbot/carbon/src',
+    );
+
+    public static $prefixesPsr0 = array (
+        'U' => 
+        array (
+            'UpdateHelper\\' => 
+            array (
+                0 => __DIR__ . '/..' . '/kylekatarnls/update-helper/src',
+            ),
+        ),
     );
 
     public static function getInitializer(ClassLoader $loader)
@@ -67,7 +72,8 @@ class ComposerStaticInit26f2ccdf314ea23580e659cbaab8fe51
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit26f2ccdf314ea23580e659cbaab8fe51::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit26f2ccdf314ea23580e659cbaab8fe51::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit26f2ccdf314ea23580e659cbaab8fe51::$classMap;
+            $loader->fallbackDirsPsr4 = ComposerStaticInit26f2ccdf314ea23580e659cbaab8fe51::$fallbackDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit26f2ccdf314ea23580e659cbaab8fe51::$prefixesPsr0;
 
         }, null, ClassLoader::class);
     }

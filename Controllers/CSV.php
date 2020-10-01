@@ -23,7 +23,7 @@ class CSV
     {
 
         $this->csv[0] = [
-            'Purchase ID', 'Confirmed', 'Resort Tax Amount', 'Accommodation Tax Amount', 'Purchase Total', 'Discount',
+            'Purchase ID', 'Confirmed', 'Resort Tax Amount', 'Resort Tax Percent', 'Accommodation Tax Amount', 'Accommodation Tax Percent', 'Purchase Total', 'Discount',
             'Good Sam Number', 'Billing First Name', 'Billing Last Name', 'Billing Address', 'Billing City',
             'Billing State', 'Billing Zip', 'Billing Country', 'Billing Phone', 'Billing Email', 'Payment Gateway',
             'Purchase Date', 'Arrival Time', 'Check In', 'Check Out', 'Comments', 'Notes', 'Product Name', 'SKU'
@@ -45,10 +45,12 @@ class CSV
             $this->csv[$i] = [
                 $b->purchase_id,
                 $b->confirmed,
-                '$'.$b->resort_tax,
-                '$'.$b->accommodation_tax,
-                '$'.$b->total_price,
-                '$'.$b->discount_total,
+                $b->resort_tax_amount,
+                $b->resort_tax_perc,
+                $b->accommodation_tax_amount,
+                $b->accommodation_tax_perc,
+                $b->total_price,
+                $b->discount_total,
                 $b->good_sam_number,
                 $b->first_name,
                 $b->last_name,

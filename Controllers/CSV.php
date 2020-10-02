@@ -89,6 +89,9 @@ class CSV
         }
 
         fclose($fh);
+
+
+        file_put_contents($filename, array_unique(file($filename)));
     }
 
     public function get_file_url()

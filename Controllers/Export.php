@@ -5,6 +5,7 @@ namespace GraysonErhard\ReservationExporter\Controllers;
 
 use Carbon\Carbon;
 use WP_REST_Server;
+use WP_REST_Request;
 use WP_Query;
 use GraysonErhard\ReservationExporter\Controllers\CSV;
 
@@ -42,7 +43,7 @@ class Export
     {
 
         add_action('rest_api_init', function () {
-            register_rest_route(RE_API_NAMESPACE, '/export', [
+            register_rest_route(RE_API_NAMESPACE, '/export/(?P<limit>\d+)/(?P<offset>\d+)', [
                 [
                     'methods' => WP_REST_Server::READABLE, 'callback' => [
                     $this, 'get'
@@ -53,7 +54,7 @@ class Export
 
     }
 
-    public function get()
+    public function get(WP_REST_Request $request)
     {
 
         // wp_wpsc_order_booking_info & wp_wpsc_order_booking_info_orig - Booking and Purchase data
@@ -63,9 +64,14 @@ class Export
         // wp_wpsc_purchase_logs & wp_wpsc_purchase_logs_orig - contains address data, gateway, notes
         // wp_wpsc_submited_form_data - address and customer info
 
+        // Looks like there's 18606 valid results.
 
-        $this->limit  = 8000;
-        $this->offset = 0;
+        $limit             = (double) $request->get_param('limit');
+        $offset            = (double) $request->get_param('offset');
+        $this->limit       = ($limit == 0) ? 1000 : $limit;
+        $this->offset      = ($offset == 0) ? 0 : $offset;
+        $this->i           = 0;
+        $this->date_format = 'm/d/Y';
 
         $this->orig = ''; // don't get data from database tables appended with '_orig'
         $this->get_data();
@@ -80,17 +86,16 @@ class Export
 
     public function get_data()
     {
-        $this->i = 0;
-        $orig    = $this->orig;
+        $orig = $this->orig;
 
         $this->booking_query = "SELECT * FROM wp_wpsc_order_booking_info$orig LIMIT ".$this->limit." OFFSET ".$this->offset;
 
         global $wpdb;
         $bookings = $wpdb->get_results($this->booking_query);
 
-        foreach ($bookings as $i => $b) {
+        foreach ($bookings as $b) {
 
-            $this->i = $i;
+            $this->i++;
             $this->b = $b;
 
             $this->customer_query    = "SELECT * FROM wp_wpsc_submited_form_data WHERE log_id = ".$this->b->order_id;
@@ -101,7 +106,7 @@ class Export
             $this->set_payment_data();
             $this->set_product_data();
 
-            if ($this->no_first_name && $this->no_total) {
+            if ($this->no_first_name || $this->no_total) {
                 unset($this->export[$this->i]);
             }
 
@@ -116,28 +121,11 @@ class Export
         $this->export[$this->i]                  = new \stdClass();
         $this->export[$this->i]->booking_details = $this->b;
         $this->export[$this->i]->purchase_id     = $this->b->entity_id.$this->orig;
-        $this->export[$this->i]->purchase_date   = Carbon::parse($this->b->created_at)->format('M d Y');
+        $this->export[$this->i]->purchase_date   = Carbon::parse($this->b->created_at)->format($this->date_format);
         $this->export[$this->i]->confirmed       = ($this->b->status == '1') ? 'Yes' : 'No';
-
-        $this->export[$this->i]->resort_tax_amount = '$';
-        $this->export[$this->i]->resort_tax_amount .= (double) round($this->b->resort_tax, 2);
-        $this->export[$this->i]->resort_tax_perc   = ((0 != $this->b->resort_tax) || (0 != $this->b->price)) ? (double) ((double) $this->b->resort_tax / (double) $this->b->price) * 100 : 'N/A';
-        $this->export[$this->i]->resort_tax_perc   = round($this->export[$this->i]->resort_tax_perc, 2);
-        $this->export[$this->i]->resort_tax_perc   .= '%';
-
-        $this->export[$this->i]->accommodation_tax_amount = '$';
-        $this->export[$this->i]->accommodation_tax_amount .= (double) round($this->b->accomodation_tax, 2);
-        $this->export[$this->i]->accommodation_tax_perc   = ((0 != $this->b->accomodation_tax) || (0 != $this->b->price)) ? (double) ((double) $this->b->accomodation_tax / (double) $this->b->price) * 100 : 'N/A';
-        $this->export[$this->i]->accommodation_tax_perc   = round($this->export[$this->i]->accommodation_tax_perc, 2);
-        $this->export[$this->i]->accommodation_tax_perc   .= '%';
-
-        $this->export[$this->i]->discount_total = '$';
-        $this->export[$this->i]->discount_total .= (double) $this->b->discount;
-
         $this->export[$this->i]->good_sam_number = ($this->b->good_sam_number == 0) ? '' : (double) $this->b->good_sam_number;
-
-        $this->export[$this->i]->check_in  = Carbon::parse($this->b->from_date)->format('M d Y');
-        $this->export[$this->i]->check_out = Carbon::parse($this->b->to_date)->format('M d Y');
+        $this->export[$this->i]->check_in        = Carbon::parse($this->b->from_date)->format($this->date_format);
+        $this->export[$this->i]->check_out       = Carbon::parse($this->b->to_date)->format($this->date_format);
     }
 
     public function set_customer_data()
@@ -216,10 +204,31 @@ class Export
         $this->export[$this->i]->transaction     = $t;
         $this->export[$this->i]->note            = $t->notes;
         $this->export[$this->i]->payment_gateway = $t->gateway;
-        $this->export[$this->i]->total_price     = '$';
-        $this->export[$this->i]->total_price     .= (double) $t->totalprice; // not sure if this is the final price
+        $this->export[$this->i]->discount_total  = '$';
+        $this->export[$this->i]->discount_total  .= (double) $this->b->discount;
 
-        $this->no_total = (((double) $t->totalprice == 0) || (null == $t->totalprice));
+        $price_minus_discount = (double) ((double) $this->b->price + (double) $this->b->guest_fee) - (double) $this->b->discount;
+
+        $this->export[$this->i]->resort_tax_amount = '$';
+        $resort_tax_amount                         = (double) round($this->b->resort_tax, 2);
+        $this->export[$this->i]->resort_tax_amount .= $resort_tax_amount;
+        $this->export[$this->i]->resort_tax_perc   = ((0 != $this->b->resort_tax) && (0 != $price_minus_discount)) ? (double) ((double) $this->b->resort_tax / $price_minus_discount) * 100 : 'N/A';
+        $this->export[$this->i]->resort_tax_perc   = round($this->export[$this->i]->resort_tax_perc, 2);
+        $this->export[$this->i]->resort_tax_perc   .= '%';
+
+        $this->export[$this->i]->accommodation_tax_amount = '$';
+        $accommodation_tax_amount                         = (double) round($this->b->accomodation_tax, 2);
+        $this->export[$this->i]->accommodation_tax_amount .= $accommodation_tax_amount;
+        $this->export[$this->i]->accommodation_tax_perc   = ((0 != $this->b->accomodation_tax) && (0 != $price_minus_discount)) ? (double) ((double) $this->b->accomodation_tax / $price_minus_discount) * 100 : 'N/A';
+        $this->export[$this->i]->accommodation_tax_perc   = round($this->export[$this->i]->accommodation_tax_perc, 2);
+        $this->export[$this->i]->accommodation_tax_perc   .= '%';
+
+
+        $this->export[$this->i]->total_price = '$';
+        $total_price                         = (double) $price_minus_discount + (double) $this->b->accomodation_tax + (double) $this->b->resort_tax;
+        $this->export[$this->i]->total_price .= $total_price;
+        $this->no_total                      = ((double) $total_price == 0);
+
     }
 
     public function set_product_data()

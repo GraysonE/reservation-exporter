@@ -8,7 +8,7 @@ $( document ).ready( () => {
 
 async function reservation_export() {
 
-	fetch( '/wp-json/re/v1/export' )
+	fetch( '/wp-json/re/v1/export/2000/0' )
 		.then( function( response ) {
 			if ( response.status !== 200 ) {
 				console.log( 'Looks like there was a problem. Status Code: ' + response.status );
@@ -18,7 +18,7 @@ async function reservation_export() {
 			// Examine the text in the response
 			response.json().then( function( r ) {
 				console.log( r.data.export );
-				// window.open( r.data.url, '_blank' );
+				window.open( r.data.url, '_blank' );
 			} );
 		} )
 		.catch( function( err ) {

@@ -21,9 +21,9 @@ class CSV
 
     public function set_headers()
     {
-
+//            'Purchase ID',
         $this->csv[0] = [
-            'Purchase ID', 'Confirmed', 'Resort Tax Amount', 'Resort Tax Percent', 'Accommodation Tax Amount', 'Accommodation Tax Percent', 'Purchase Total', 'Discount',
+            'Confirmed', 'Resort Tax Amount', 'Resort Tax Percent', 'Accommodation Tax Amount', 'Accommodation Tax Percent', 'Purchase Total', 'Discount',
             'Good Sam Number', 'Billing First Name', 'Billing Last Name', 'Billing Address', 'Billing City',
             'Billing State', 'Billing Zip', 'Billing Country', 'Billing Phone', 'Billing Email', 'Payment Gateway',
             'Purchase Date', 'Arrival Time', 'Check In', 'Check Out', 'Comments', 'Notes', 'Product Name', 'SKU'
@@ -42,8 +42,8 @@ class CSV
 
             $i++;
 
+//                $b->purchase_id,
             $this->csv[$i] = [
-                $b->purchase_id,
                 $b->confirmed,
                 $b->resort_tax_amount,
                 $b->resort_tax_perc,
@@ -72,10 +72,25 @@ class CSV
                 $b->sku,
             ];
 
-
-
         }
 
+        // Remove duplicates
+        $this->csv = array_map('unserialize', array_unique(array_map('serialize', $this->csv)));
+
+//        $this->escape_csv();
+
+    }
+
+    public function escape_csv( ) {
+        $line = '';
+
+        $values = array_map(function ($v) {
+            return '"' . str_replace('"', '""', $v) . '"';
+        }, $this->csv);
+
+        $line .= implode(',', $values);
+
+        return $line;
     }
 
     public function create_file()
@@ -84,14 +99,13 @@ class CSV
 
         $fh = fopen($filename, "w");
 
-        foreach ($this->csv as $line) {
-            fputcsv($fh, $line, ',');
+        $unique_values = array_unique($this->csv);
+
+        foreach ($unique_values as $line) {
+            fputcsv($fh, $line, ',', "\"", "\\");
         }
 
         fclose($fh);
-
-
-        file_put_contents($filename, array_unique(file($filename)));
     }
 
     public function get_file_url()

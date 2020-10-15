@@ -99,9 +99,7 @@ class CSV
 
         $fh = fopen($filename, "w");
 
-        $unique_values = array_unique($this->csv);
-
-        foreach ($unique_values as $line) {
+        foreach ($this->csv as $line) {
             fputcsv($fh, $line, ',', "\"", "\\");
         }
 
